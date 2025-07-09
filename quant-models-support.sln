@@ -1,0 +1,34 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 12.00
+# Visual Studio Version 17
+VisualStudioVersion = 17.12.35527.113
+MinimumVisualStudioVersion = 10.0.40219.1
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "QUANT.PATTERNS", "QUANT.PATTERNS\QUANT.PATTERNS.csproj", "{29C2F151-6977-4E49-AB8B-4D5BBDB11567}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "QUANT.API", "QUANT.API\QUANT.API.csproj", "{E61E8348-4824-4E36-B42B-FF58D8CD4642}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "QUANT.TEST", "QUANT.TEST\QUANT.TEST.csproj", "{865A4980-D6AF-4611-95E0-BC057750B3E0}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Any CPU = Debug|Any CPU
+		Release|Any CPU = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{29C2F151-6977-4E49-AB8B-4D5BBDB11567}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{29C2F151-6977-4E49-AB8B-4D5BBDB11567}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{29C2F151-6977-4E49-AB8B-4D5BBDB11567}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{29C2F151-6977-4E49-AB8B-4D5BBDB11567}.Release|Any CPU.Build.0 = Release|Any CPU
+		{E61E8348-4824-4E36-B42B-FF58D8CD4642}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{E61E8348-4824-4E36-B42B-FF58D8CD4642}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{E61E8348-4824-4E36-B42B-FF58D8CD4642}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{E61E8348-4824-4E36-B42B-FF58D8CD4642}.Release|Any CPU.Build.0 = Release|Any CPU
+		{865A4980-D6AF-4611-95E0-BC057750B3E0}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{865A4980-D6AF-4611-95E0-BC057750B3E0}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{865A4980-D6AF-4611-95E0-BC057750B3E0}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{865A4980-D6AF-4611-95E0-BC057750B3E0}.Release|Any CPU.Build.0 = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+EndGlobal
