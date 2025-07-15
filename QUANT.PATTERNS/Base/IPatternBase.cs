@@ -42,12 +42,70 @@ namespace QUANT.PATTERNS.Base
         /// <param name="swingLookback"></param>
         /// <returns></returns>
         DataFrame DetectMarketStructure(DataFrame df, int swingLookback = 5);
-        //void SupportZone();
-        //void ResistanceZone();
-        //void SupplyZone();
-        //void DemandZone();
-        //void Breakout();
-        //void Fakeout();
 
+        /// <summary>
+        /// Hàm xác định bos, choch
+        /// </summary>
+        /// <param name="df"></param>
+        /// <param name="useVolume"></param>
+        /// <param name="volumeLookback"></param>
+        /// <param name="volumeThreshold">mặc định 1,2 (Nghĩa là volume hiện tại phải lớn hơn 120% trung bình)</param>
+        /// <returns></returns>
+        DataFrame DetectBosAndChoch(DataFrame df, bool useVolume = false, int volumeLookback = 20, decimal volumeThreshold = 1.2M);
+
+        /// <summary>
+        /// Hàm xác định order block + mitigation
+        /// </summary>
+        /// <param name="df"></param>
+        /// <param name="atrPeriod"></param>
+        /// <param name="multiplier"></param>
+        /// <returns></returns>
+        DataFrame DetectOrderBlocks(DataFrame df, int atrPeriod = 14, decimal multiplier = 2M);
+
+        /// <summary>
+        /// Hàm xác định FVG
+        /// </summary>
+        /// <param name="df"></param>
+        /// <returns></returns>
+        DataFrame DetectFVG(DataFrame df);
+
+        /// <summary>
+        /// Hàm xác định Equal High, Low
+        /// </summary>
+        /// <param name="df"></param>
+        /// <param name="thresholdPct"></param>
+        /// <param name="atrPeriod"></param>
+        /// <returns></returns>
+        DataFrame DetectEQHL(DataFrame df, decimal thresholdPct = 0.1M, int atrPeriod = 14);
+
+        /// <summary>
+        /// Hàm phân vùng Premium, Discount
+        /// </summary>
+        /// <param name="df"></param>
+        /// <param name="window"></param>
+        /// <returns></returns>
+        DataFrame ComputePremiumDiscount(DataFrame df, int window = 50);
+
+        /// <summary>
+        /// Hàm gắn nhãn Strong, Weak
+        /// </summary>
+        /// <param name="df"></param>
+        /// <returns></returns>
+        DataFrame LabelStrongWeak(DataFrame df);
+
+        /// <summary>
+        /// Hàm áp dụng bộ lọc Confluence
+        /// </summary>
+        /// <param name="df"></param>
+        /// <returns></returns>
+        DataFrame ApplyConfluenceFilter(DataFrame df);
+
+        /// <summary>
+        /// Hàm xác định FVG, OB cho timeframe nhỏ
+        /// </summary>
+        /// <param name="df"></param>
+        /// <param name="tfDf"></param>
+        /// <returns></returns>
+        DataFrame DetectMtfFvgOb(DataFrame df, DataFrame tfDf);
     }
 }

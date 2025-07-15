@@ -7,14 +7,23 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <Folder Include="Models\Requests\" />
-    <Folder Include="SmartMoney\" />
-    <Folder Include="Wyckoff\" />
-    <Folder Include="PriceAction\" />
+    <Compile Remove="PriceAction\**" />
+    <Compile Remove="SmartMoney\**" />
+    <Compile Remove="Wyckoff\**" />
+    <EmbeddedResource Remove="PriceAction\**" />
+    <EmbeddedResource Remove="SmartMoney\**" />
+    <EmbeddedResource Remove="Wyckoff\**" />
+    <None Remove="PriceAction\**" />
+    <None Remove="SmartMoney\**" />
+    <None Remove="Wyckoff\**" />
   </ItemGroup>
 
   <ItemGroup>
     <PackageReference Include="Microsoft.Data.Analysis" Version="0.22.2" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <Folder Include="Models\Requests\" />
   </ItemGroup>
 
 </Project>
