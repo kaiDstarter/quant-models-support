@@ -66,16 +66,16 @@ namespace QUANT.PATTERNS.Base
             return result;
         }
 
-        private List<decimal?> RMA(List<decimal> values, int period)
+        private List<decimal> RMA(List<decimal> values, int period)
         {
-            var result = new List<decimal?>();
-            decimal? prevRma = null;
+            var result = new List<decimal>();
+            decimal prevRma = 0;
 
             for (int i = 0; i < values.Count; i++)
             {
                 if (i < period - 1)
                 {
-                    result.Add(null);
+                    result.Add(0);
                     continue;
                 }
 
@@ -159,12 +159,12 @@ namespace QUANT.PATTERNS.Base
             return atrCol;
         }
 
-        public PrimitiveDataFrameColumn<int> PivotHigh(DataFrame df, int left = 5, int right = 5)
+        public PrimitiveDataFrameColumn<bool> PivotHigh(DataFrame df, int left = 5, int right = 5)
         {
             var highs = df["High"] as PrimitiveDataFrameColumn<decimal>;
-            if (highs == null) return new PrimitiveDataFrameColumn<int>("PIVOT_HIGH");
+            if (highs == null) return new PrimitiveDataFrameColumn<bool>("PIVOT_HIGH");
             int n = highs.Count();
-            var result = new List<int>();
+            bool[] result = new bool[n];
 
             for (int i = left; i < n - left; i++)
             {
@@ -181,19 +181,17 @@ namespace QUANT.PATTERNS.Base
                         break;
                     }
                 }
-
-                if (isPivot)
-                    result.Add(i);
+                result[i] = isPivot;
             }
-            return new PrimitiveDataFrameColumn<int>("PIVOT_HIGH", result);
+            return new PrimitiveDataFrameColumn<bool>("PIVOT_HIGH", result);
         }
 
-        public PrimitiveDataFrameColumn<int> PivotLow(DataFrame df, int left = 5, int right = 5)
+        public PrimitiveDataFrameColumn<bool> PivotLow(DataFrame df, int left = 5, int right = 5)
         {
             var lows = df["Low"] as PrimitiveDataFrameColumn<decimal>;
-            if (lows == null) return new PrimitiveDataFrameColumn<int>("PIVOT_LOW");
+            if (lows == null) return new PrimitiveDataFrameColumn<bool>("PIVOT_LOW");
             int n = lows.Count();
-            var result = new List<int>();
+            bool[] result = new bool[n];
 
             for (int i = left; i < n - left; i++)
             {
@@ -211,10 +209,9 @@ namespace QUANT.PATTERNS.Base
                     }
                 }
 
-                if (isPivot)
-                    result.Add(i);
+                result[i] = isPivot;
             }
-            return new PrimitiveDataFrameColumn<int>("PIVOT_LOW", result);
+            return new PrimitiveDataFrameColumn<bool>("PIVOT_LOW", result);
         }
 
         public DataFrame DetectMarketStructure(DataFrame df, int swingLookback = 5)
@@ -227,8 +224,8 @@ namespace QUANT.PATTERNS.Base
             swingHighCol.SetName("SwingHigh");
             swingLowCol.SetName("SwingLow");
 
-            df.Columns.Concat([swingHighCol, swingLowCol]);
-            //df.Columns.Add(swingLowCol);
+            df.Columns.Add(swingHighCol);
+            df.Columns.Add(swingLowCol);
 
             var structure = new List<string>();
             decimal? lastHigh = null, lastLow = null;
@@ -240,9 +237,10 @@ namespace QUANT.PATTERNS.Base
             for (int i = 0; i < df.Rows.Count; i++)
             {
                 string label = "";
-
+                bool? hasHigh = swingHighCol[i];
+                bool? hasLow = swingLowCol[i];
                 // Nếu là SwingHigh
-                if (swingHighCol[i].HasValue)
+                if (hasHigh.HasValue && hasHigh.Value)
                 {
                     if (lastHigh == null || high[i] > lastHigh)
                         label = "HH";
@@ -251,7 +249,7 @@ namespace QUANT.PATTERNS.Base
                     lastHigh = high[i];
                 }
                 // Nếu là SwingLow
-                else if (swingHighCol[i].HasValue)
+                else if (hasLow.HasValue && hasLow.Value)
                 {
                     if (lastLow == null || low[i] < lastLow)
                         label = "LL";
@@ -263,6 +261,41 @@ namespace QUANT.PATTERNS.Base
             }
 
             df.Columns.Add(new StringDataFrameColumn("Structure", structure));
+            return df;
+        }
+
+        public DataFrame DetectPointDrawBosChoCh(DataFrame df, int swingLookback = 5)
+        {
+            var structure = df.Columns.Any(x => x.Name.Equals("Structure")) ? df["Structure"] as StringDataFrameColumn : null;
+            var closes = df.Columns.Any(x => x.Name.Equals("Close")) ? df["Close"] as DecimalDataFrameColumn : null;
+            var highs = df.Columns.Any(x => x.Name.Equals("High")) ? df["High"] as DecimalDataFrameColumn : null;
+            var lows = df.Columns.Any(x => x.Name.Equals("Low")) ? df["Low"] as DecimalDataFrameColumn : null;
+            var times = df.Columns.Any(x => x.Name.Equals("Time")) ? df["Time"] as PrimitiveDataFrameColumn<long> : null;
+            if (structure == null || closes == null || highs == null || lows == null || times == null)
+                return df;
+            int n = structure.Count();
+            var points = new PrimitiveDataFrameColumn<long>("BosChoChPoint", n);
+            for (int i = 0; i < n; i++)
+            {
+                var label = structure[i];
+                if (string.IsNullOrWhiteSpace(label)) continue;
+
+                int index = -1;
+                var high = highs[i];
+                var low = lows[i];
+                //nếu đỉnh là tăng thì tìm point là thân nến > đỉnh này
+                if (label == "HH" || label == "LH")
+                {
+                    index = closes.ToList().FindIndex(i + 5, x => x >= high);
+                }
+                else if (label == "HL" || label == "LL")
+                {
+                    index = closes.ToList().FindIndex(i + 5, x => x <= high);
+                }
+                if (index < 0) continue;
+                points[i] = times[index];
+            }
+            df.Columns.Add(points);
             return df;
         }
 
@@ -342,6 +375,42 @@ namespace QUANT.PATTERNS.Base
 
             df.Columns.Add(bosCol);
             df.Columns.Add(chochCol);
+            return df;
+        }
+
+        public DataFrame DetectBosAndChoch(DataFrame df)
+        {
+            if (!df.Columns.Any(x => x.Name.Contains("Structure"))) return df;
+
+            var structureCol = df["Structure"] as StringDataFrameColumn;
+            if (structureCol == null) return df;
+            int n = df.Rows.Count();
+            var signalCol = new StringDataFrameColumn("Signal", n);
+
+            string? prevTrend = null;
+
+            for (int i = 1; i < n; i++)
+            {
+                string s = structureCol[i]?.ToString() ?? "";
+                // Xác định trend hiện tại
+                string currentTrend =
+                    (s == "HH" || s == "LH") ? "up" :
+                    (s == "LL" || s == "HL") ? "down" :
+                    prevTrend;
+
+                // Nếu đổi hướng => CHoCH
+                if (!string.IsNullOrEmpty(prevTrend) && currentTrend != null && currentTrend != prevTrend)
+                    signalCol[i] = "CHoCH";
+                // Nếu tiếp tục hướng cũ => BOS
+                else if (!string.IsNullOrEmpty(prevTrend) && currentTrend != null && currentTrend == prevTrend)
+                    signalCol[i] = "BOS";
+                else
+                    signalCol[i] = "";
+
+                prevTrend = currentTrend;
+            }
+
+            df.Columns.Add(signalCol);
             return df;
         }
         public DataFrame DetectOrderBlocks(DataFrame df, int atrPeriod = 14, decimal multiplier = 2M)
@@ -482,27 +551,24 @@ namespace QUANT.PATTERNS.Base
             var atrVals = ATR(df, atrPeriod);
 
             // Tạo cột EQH/EQL
-            var eqhCol = new BooleanDataFrameColumn("EQH", n);
-            var eqlCol = new BooleanDataFrameColumn("EQL", n);
+            var eqhCol = new BooleanDataFrameColumn("EQH", new bool[n]);
+            var eqlCol = new BooleanDataFrameColumn("EQL", new bool[n]);
 
             for (int i = 1; i < n; i++)
             {
                 var atr = atrVals[i] ?? 0;
                 // EQH: chênh lệch high nhỏ hơn ngưỡng ATR * thresholdPct
-                if (Math.Abs(highCol[i] ?? 0 - highCol[i - 1] ?? 0) <= atr * thresholdPct)
+                if (Math.Abs((highCol[i] ?? 0) - (highCol[i - 1] ?? 0)) <= atr * thresholdPct)
                     eqhCol[i] = true;
                 else
                     eqhCol[i] = false;
 
                 // EQL: chênh lệch low nhỏ hơn ngưỡng ATR * thresholdPct
-                if (Math.Abs(lowCol[i] ?? 0 - lowCol[i - 1] ?? 0) <= atr * thresholdPct)
+                if (Math.Abs((lowCol[i] ?? 0) - (lowCol[i - 1] ?? 0)) <= atr * thresholdPct)
                     eqlCol[i] = true;
                 else
                     eqlCol[i] = false;
             }
-            // Nến đầu tiên mặc định không thể có EQH/EQL
-            eqhCol[0] = false;
-            eqlCol[0] = false;
 
             df.Columns.Add(eqhCol);
             df.Columns.Add(eqlCol);
@@ -552,7 +618,6 @@ namespace QUANT.PATTERNS.Base
 
         public DataFrame LabelStrongWeak(DataFrame df)
         {
-            df = df.Clone();
             var highCol = df["High"] as PrimitiveDataFrameColumn<decimal>;
             var lowCol = df["Low"] as PrimitiveDataFrameColumn<decimal>;
             var structureCol = df["Structure"] as StringDataFrameColumn;
@@ -592,7 +657,6 @@ namespace QUANT.PATTERNS.Base
 
         public DataFrame ApplyConfluenceFilter(DataFrame df)
         {
-            df = df.Clone();
             var openCol = df["Open"] as PrimitiveDataFrameColumn<decimal>;
             var closeCol = df["Close"] as PrimitiveDataFrameColumn<decimal>;
             var highCol = df["High"] as PrimitiveDataFrameColumn<decimal>;
@@ -609,8 +673,8 @@ namespace QUANT.PATTERNS.Base
 
             for (int i = 0; i < n; i++)
             {
-                decimal bodySize = Math.Abs(closeCol[i] ?? 0 - openCol[i] ?? 0);
-                decimal wickSize = (highCol[i] ?? 0 - lowCol[i] ?? 0) - bodySize;
+                decimal bodySize = Math.Abs((closeCol[i] ?? 0) - (openCol[i] ?? 0));
+                decimal wickSize = ((highCol[i] ?? 0) - (lowCol[i] ?? 0)) - bodySize;
                 bodySizeCol[i] = bodySize;
                 wickSizeCol[i] = wickSize;
                 confluenceCol[i] = bodySize > wickSize;

@@ -28,6 +28,7 @@ nupkg/
 
 #runtime
 [Ll]ogs/
+[Uu]ploads/
 
 # Build results
 [Dd]ebug/

@@ -6,9 +6,9 @@ using System.Threading.Tasks;
 
 namespace QUANT.PATTERNS.Models.Responses.Shape
 {
-    internal class ShapeOption
+    public class ShapeOption
     {
-        public string shapeName { get; set; }
+        public string? shape { get; set; }
         public string? text {  get; set; }
     }
 }

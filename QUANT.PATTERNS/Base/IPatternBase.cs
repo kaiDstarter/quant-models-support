@@ -25,7 +25,7 @@ namespace QUANT.PATTERNS.Base
         /// <param name="left"></param>
         /// <param name="right"></param>
         /// <returns></returns>
-        PrimitiveDataFrameColumn<int> PivotHigh(DataFrame df, int left = 5, int right = 5);
+        PrimitiveDataFrameColumn<bool> PivotHigh(DataFrame df, int left = 5, int right = 5);
         /// <summary>
         /// hàm tìm đáy cục bộ
         /// </summary>
@@ -33,7 +33,7 @@ namespace QUANT.PATTERNS.Base
         /// <param name="left"></param>
         /// <param name="right"></param>
         /// <returns></returns>
-        PrimitiveDataFrameColumn<int> PivotLow(DataFrame df, int left = 5, int right = 5);
+        PrimitiveDataFrameColumn<bool> PivotLow(DataFrame df, int left = 5, int right = 5);
 
         /// <summary>
         /// Hàm đánh dấu thị trường HH, LH, HL, LL
@@ -42,7 +42,13 @@ namespace QUANT.PATTERNS.Base
         /// <param name="swingLookback"></param>
         /// <returns></returns>
         DataFrame DetectMarketStructure(DataFrame df, int swingLookback = 5);
-
+        DataFrame DetectPointDrawBosChoCh(DataFrame df, int swingLookback = 5);
+        /// <summary>
+        /// Hàm xác định Bos, ChoCh
+        /// </summary>
+        /// <param name="df"></param>
+        /// <returns></returns>
+        DataFrame DetectBosAndChoch(DataFrame df);
         /// <summary>
         /// Hàm xác định bos, choch
         /// </summary>

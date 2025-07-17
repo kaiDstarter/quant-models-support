@@ -6,8 +6,8 @@ using System.Threading.Tasks;
 
 namespace QUANT.PATTERNS.Models;
 
-internal class ShapePoint
+public class ShapePoint
 {
-    public double time { get; set; }
-    public double price { get; set; }
+    public long time { get; set; }
+    public decimal price { get; set; }
 }
