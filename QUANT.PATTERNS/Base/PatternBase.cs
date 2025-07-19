@@ -283,17 +283,21 @@ namespace QUANT.PATTERNS.Base
                 int index = -1;
                 var high = highs[i];
                 var low = lows[i];
+
+                var filters = closes.ToList().Skip(i + 5).Take(35).ToList();
+
                 //nếu đỉnh là tăng thì tìm point là thân nến > đỉnh này
                 if (label == "HH" || label == "LH")
                 {
-                    index = closes.ToList().FindIndex(i + 5, x => x >= high);
+                    
+                    index = filters.FindIndex(0, x => x >= high);
                 }
                 else if (label == "HL" || label == "LL")
                 {
-                    index = closes.ToList().FindIndex(i + 5, x => x <= high);
+                    index = filters.FindIndex(0, x => x <= low);
                 }
                 if (index < 0) continue;
-                points[i] = times[index];
+                points[i] = times[index+5+i];
             }
             df.Columns.Add(points);
             return df;
@@ -318,7 +322,6 @@ namespace QUANT.PATTERNS.Base
 
             string? trend = null;
             int? lastHighIdx = null, lastLowIdx = null;
-
             for (int i = 0; i < df.Rows.Count; i++)
             {
                 string label = structure[i];

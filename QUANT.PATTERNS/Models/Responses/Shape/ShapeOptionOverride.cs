@@ -6,10 +6,7 @@ using System.Threading.Tasks;
 
 namespace QUANT.PATTERNS.Models.Responses.Shape
 {
-    public class ShapeOption
+    public class ShapeOptionOverride
     {
-        public string? shape { get; set; }
-        public string? text { get; set; }
-        public Dictionary<string, object>? overrides { get; set; }
     }
 }
