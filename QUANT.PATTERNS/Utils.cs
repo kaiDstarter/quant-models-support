@@ -10,6 +10,14 @@ namespace QUANT.PATTERNS
 {
     public class Utils
     {
-        
+        public static  bool IsUpMarket(string structure)
+        {
+            return (structure == Constants.HIGH_HIGH || structure == Constants.LOW_HIGH);
+        }
+
+        public static bool IsDownMarket(string structure)
+        {
+            return (structure == Constants.LOW_LOW || structure == Constants.HIGH_LOW);
+        }
     }
 }

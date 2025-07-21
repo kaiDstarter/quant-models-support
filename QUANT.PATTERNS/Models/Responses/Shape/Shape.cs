@@ -16,4 +16,6 @@ public class Shape
     public ShapeType shapeType { get; set; }
     public List<ShapePoint>? points { get; set; }
     public ShapeOption? shapeOptions { get; set; }
+    public string trend { get; set; } = "";
+    public decimal price { get; set; }
 }

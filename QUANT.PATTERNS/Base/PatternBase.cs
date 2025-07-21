@@ -243,18 +243,18 @@ namespace QUANT.PATTERNS.Base
                 if (hasHigh.HasValue && hasHigh.Value)
                 {
                     if (lastHigh == null || high[i] > lastHigh)
-                        label = "HH";
+                        label = Constants.HIGH_HIGH;
                     else
-                        label = "LH";
+                        label = Constants.LOW_HIGH;
                     lastHigh = high[i];
                 }
                 // Nếu là SwingLow
                 else if (hasLow.HasValue && hasLow.Value)
                 {
                     if (lastLow == null || low[i] < lastLow)
-                        label = "LL";
+                        label = Constants.LOW_LOW;
                     else
-                        label = "HL";
+                        label = Constants.HIGH_LOW;
                     lastLow = low[i];
                 }
                 structure.Add(label);
@@ -284,20 +284,20 @@ namespace QUANT.PATTERNS.Base
                 var high = highs[i];
                 var low = lows[i];
 
-                var filters = closes.ToList().Skip(i + 5).Take(35).ToList();
+                var filters = closes.ToList().Skip(i + 5).Take(200).ToList();
 
                 //nếu đỉnh là tăng thì tìm point là thân nến > đỉnh này
-                if (label == "HH" || label == "LH")
+                if (Utils.IsUpMarket(label))
                 {
-                    
+
                     index = filters.FindIndex(0, x => x >= high);
                 }
-                else if (label == "HL" || label == "LL")
+                else if (Utils.IsDownMarket(label))
                 {
                     index = filters.FindIndex(0, x => x <= low);
                 }
                 if (index < 0) continue;
-                points[i] = times[index+5+i];
+                points[i] = times[index + 5 + i];
             }
             df.Columns.Add(points);
             return df;
@@ -345,31 +345,31 @@ namespace QUANT.PATTERNS.Base
                 }
 
                 // BOS
-                if (label == "HH" && trend == "up" && lastHighIdx != null)
+                if (Utils.IsUpMarket(label) && trend == Constants.UP && lastHighIdx != null)
                     if (!useVolume || volumeOk)
-                        bos = "BOS";
-                if (label == "LL" && trend == "down" && lastLowIdx != null)
+                        bos = Constants.BOS;
+                if (Utils.IsDownMarket(label) && trend == Constants.DOWN && lastLowIdx != null)
                     if (!useVolume || volumeOk)
-                        bos = "BOS";
+                        bos = Constants.BOS;
 
                 // CHoCH
-                if (label == "LL" && trend == "up")
+                if (label == Constants.LOW_LOW && trend == Constants.UP)
                     if (!useVolume || volumeOk)
-                        choch = "CHoCH";
-                if (label == "HH" && trend == "down")
+                        choch = Constants.CHoCH;
+                if (label == Constants.HIGH_HIGH && trend == Constants.DOWN)
                     if (!useVolume || volumeOk)
-                        choch = "CHoCH";
+                        choch = Constants.CHoCH;
 
                 // Cập nhật trend và pivot gần nhất
-                if (label == "HH" || label == "LH")
+                if (Utils.IsUpMarket(label))
                 {
-                    trend = "up";
-                    if (label == "HH") lastHighIdx = i;
+                    trend = Constants.UP;
+                    lastHighIdx = i;
                 }
-                else if (label == "LL" || label == "HL")
+                else if (Utils.IsDownMarket(label))
                 {
-                    trend = "down";
-                    if (label == "LL") lastLowIdx = i;
+                    trend = Constants.DOWN;
+                    lastLowIdx = i;
                 }
 
                 bosCol[i] = bos;
@@ -390,26 +390,21 @@ namespace QUANT.PATTERNS.Base
             int n = df.Rows.Count();
             var signalCol = new StringDataFrameColumn("Signal", n);
 
-            string? prevTrend = null;
+            string prevTrend = "";
 
             for (int i = 1; i < n; i++)
             {
                 string s = structureCol[i]?.ToString() ?? "";
                 // Xác định trend hiện tại
                 string currentTrend =
-                    (s == "HH" || s == "LH") ? "up" :
-                    (s == "LL" || s == "HL") ? "down" :
-                    prevTrend;
-
-                // Nếu đổi hướng => CHoCH
-                if (!string.IsNullOrEmpty(prevTrend) && currentTrend != null && currentTrend != prevTrend)
-                    signalCol[i] = "CHoCH";
-                // Nếu tiếp tục hướng cũ => BOS
-                else if (!string.IsNullOrEmpty(prevTrend) && currentTrend != null && currentTrend == prevTrend)
-                    signalCol[i] = "BOS";
-                else
+                    Utils.IsUpMarket(s) ? Constants.UP :
+                    (Utils.IsDownMarket(s) ? Constants.DOWN : prevTrend);
+                if (string.IsNullOrWhiteSpace(currentTrend))
+                {
                     signalCol[i] = "";
-
+                    continue;
+                }
+                signalCol[i] = (currentTrend != prevTrend) ? Constants.CHoCH : Constants.BOS;
                 prevTrend = currentTrend;
             }
 
@@ -635,13 +630,13 @@ namespace QUANT.PATTERNS.Base
             for (int i = 1; i < n - 5; i++)
             {
                 var structure = structureCol[i];
-                if (structure == "HH" || structure == "LH")
+                if (structure == Constants.HIGH_HIGH || structure == Constants.LOW_HIGH)
                 {
                     // Kiểm tra 4 nến tiếp theo
                     decimal futureMax = highCol.Skip(i + 1).Take(4).Max() ?? 0;
                     swingStrengthCol[i] = (futureMax < highCol[i]) ? "Strong High" : "Weak High";
                 }
-                else if (structure == "LL" || structure == "HL")
+                else if (structure == Constants.LOW_LOW || structure == Constants.HIGH_LOW)
                 {
                     decimal futureMin = lowCol.Skip(i + 1).Take(4).Min() ?? 0;
                     swingStrengthCol[i] = (futureMin > lowCol[i]) ? "Strong Low" : "Weak Low";
